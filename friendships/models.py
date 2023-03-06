@@ -10,11 +10,11 @@ class Friendship(models.Model):
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
-        related_name="friends",
+        related_name="friend_req",
     )
 
     user_relation = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
-        related_name="friends",
+        related_name="friend_res",
     )

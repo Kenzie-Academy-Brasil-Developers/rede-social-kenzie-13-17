@@ -13,4 +13,4 @@ class User(AbstractUser):
         })
     deleted_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, blank=True)
-    followers = models.ManyToManyField('self', related_name='following')
+    followers = models.ManyToManyField('users.User', related_name='following')
