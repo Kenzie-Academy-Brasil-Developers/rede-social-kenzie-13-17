@@ -10,7 +10,7 @@ class Comment(models.Model):
         related_name="comments",
     )
     publication = models.ForeignKey(
-        "publications.Publication",
+        "posts.Post",
         on_delete=models.CASCADE,
         related_name="publications",
     )
