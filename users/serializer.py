@@ -21,8 +21,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
                         'password': {'write_only': True},
-                        'deleted_at': {'write_only': True},
-                        'updated_at': {'write_only': True}
+                        'deleted_at': {'read_only': True},
+                        'updated_at': {'read_only': True},
+                        'followers': {'read_only': True},
+                        'first_name': {'required': True},
+                        'last_name': {'required': True},
                         }
 
     def create(self, validated_data: dict) -> User:
