@@ -15,5 +15,5 @@ class PostSerializer(serializers.ModelSerializer):
             'created_at']
         read_only_fields = ['id']
 
-    def create(self, validated_data: dict) -> Post:
-        return Post.objects.create_superuser(**validated_data)
+    # def create(self, validated_data: dict) -> Post:
+    #     return Post.objects.create_superuser(**validated_data)
