@@ -10,7 +10,8 @@ class User(AbstractUser):
         unique=True,
         error_messages={
             "unique": "This field must be unique.",
-        })
+        },
+    )
     deleted_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-    followers = models.ManyToManyField('users.User', related_name='following')
+    followers = models.ManyToManyField("users.User", related_name="following")
