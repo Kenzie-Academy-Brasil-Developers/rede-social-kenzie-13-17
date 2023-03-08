@@ -13,7 +13,8 @@ class PostSerializer(serializers.ModelSerializer):
             'content',
             'is_private',
             'created_at']
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'user']
 
-    # def create(self, validated_data: dict) -> Post:
-    #     return Post.objects.create_superuser(**validated_data)
+    def create(self, validated_data):
+        validated_data['user'] = self.context['user']
+        return super().create(validated_data)

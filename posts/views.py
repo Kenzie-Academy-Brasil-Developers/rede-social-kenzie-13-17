@@ -6,6 +6,7 @@ from users.models import User
 from .serializers import PostSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import Response
+from django.db.models import Q
 
 
 class PostView(ListCreateAPIView):
@@ -14,12 +15,21 @@ class PostView(ListCreateAPIView):
 
     serializer_class = PostSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        return context
+
     def get_queryset(self):
         user = self.request.user
         following_posts = Post.objects.filter(user__in=User.objects.filter(followers=user))
         friend_posts = Post.objects.filter(user__in=User.objects.filter(friend_req=user, friendship_status=True))
         posts = following_posts.union(friend_posts)
         return posts
+        # related_posts = Post.objects.filter(
+        #     Q(user__in=user.followers.all()) | Q(user__friend_res=user, friendship_status=True)
+        # )
+        # return related_posts
 
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
@@ -28,6 +38,7 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    lookup_field = "id_post"
 
     def get_queryset(self):
         id_post = self.kwargs['id_post']
