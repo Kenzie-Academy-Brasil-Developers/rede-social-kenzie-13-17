@@ -4,6 +4,7 @@ from .models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 import datetime
+from .permissions import IsReqUser
 
 
 class UserView(generics.ListCreateAPIView):
@@ -12,7 +13,9 @@ class UserView(generics.ListCreateAPIView):
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    # authentication_classes = JWTAuthentication
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsReqUser]
+
     serializer_class = UserSerializer
     queryset = User.objects.all().filter(is_active=True)
 
