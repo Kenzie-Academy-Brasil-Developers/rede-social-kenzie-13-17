@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import User
 from django.shortcuts import get_object_or_404
-import ipdb
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             "updated_at",
             "date_joined",
             "followers",
+            "following",
         ]
 
         extra_kwargs = {
@@ -26,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
             "deleted_at": {"read_only": True},
             "updated_at": {"read_only": True},
             "followers": {"read_only": True, "many": True},
+            "following": {"read_only": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
         }
@@ -54,7 +55,7 @@ class FollowSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         follower_user = get_object_or_404(User, pk=validated_data["from_user_id"])
-        # follower aqui é a lista de 'seguindo', deveria ser 'following'?
-        follower_user.followers.add(validated_data["to_user_id"])
 
-        return follower_user.followers
+        follower_user.following.add(validated_data["to_user_id"])
+
+        return {}
