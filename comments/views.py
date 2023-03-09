@@ -17,13 +17,13 @@ class CommentsView(ListCreateAPIView):
 
     def get_queryset(self):
         id_post = self.kwargs['id_post']
-        comments = Comment.objects.filter(publications_id=id_post)
+        comments = Comment.objects.filter(publication_id=id_post)
         return comments
 
     def perform_create(self, serializer):
         id_post = self.kwargs['id_post']
         get_object_or_404(Post, pk=id_post)
-        serializer.save(publications_id=id_post)
+        serializer.save(publication_id=id_post, user_id=self.request.user.id)
 
 
 class CommentsDetailView(UpdateAPIView, DestroyAPIView):
@@ -32,10 +32,4 @@ class CommentsDetailView(UpdateAPIView, DestroyAPIView):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+    lookup_url_kwarg = "id_comment"
