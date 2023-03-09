@@ -9,7 +9,7 @@ from .permissions import IsReqUser
 
 class UserView(generics.ListCreateAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.all().filter(is_active=True)
+    queryset = User.objects.filter(is_active=True)
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -17,7 +17,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReqUser]
 
     serializer_class = UserSerializer
-    queryset = User.objects.all().filter(is_active=True)
+    queryset = User.objects.filter(is_active=True)
 
     def perform_destroy(self, instance):
         instance.deleted_at = datetime.datetime.now()
