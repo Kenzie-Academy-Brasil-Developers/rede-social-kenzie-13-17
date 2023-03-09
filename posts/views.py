@@ -1,14 +1,9 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post
-from users.models import User
-from .serializers import PostSerializer, LikeSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework.views import Response
-from django.db.models import Q
-import ipdb
-
+from .serializers import PostSerializer
+from friendships.models import Friendship
 
 
 class PostView(ListCreateAPIView):
@@ -16,6 +11,7 @@ class PostView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -24,25 +20,14 @@ class PostView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        friendsreq = user.friend_req.filter(friendship_status=True).values_list('user_relation', flat=True)
-        friendsres =  user.friend_res.filter(friendship_status=True).values_list('user_relation', flat=True)
-        following = user.following.all()
-        return Post.objects.filter(
-            Q(user=user) | Q(user__in=friendsreq) | Q(user__in=friendsres) | Q(user__in=following) ,
-            is_private=False
-        ).distinct()
+        posts = Post.objects.filter(user__followers=user)
+        friends = Friendship.objects.filter(user_id=user.id)
+        for x in friends:
+            id = x.user_relation
+            friend_post = Post.objects.filter(user_id=id)
+            posts = posts.union(friend_post)
 
-        return queryset
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     following_posts = Post.objects.filter(user__in=User.objects.filter(followers=user))
-    #     friend_posts = Post.objects.filter(user__in=User.objects.filter(friend_req=user, friendship_status=True))
-    #     posts = following_posts.union(friend_posts)
-    #     return posts
-        # related_posts = Post.objects.filter(
-        #     Q(user__in=user.followers.all()) | Q(user__friend_res=user, friendship_status=True)
-        # )
-        # return related_posts
+        return posts
 
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
@@ -51,41 +36,4 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    lookup_field = "id_post"
-
-    def get_queryset(self):
-        id_post = self.kwargs['id_post']
-        instance = get_object_or_404(Post, pk=id_post)
-        return instance
-
-    def retrieve(self, request, *args, **kwargs):
-        id_post = self.kwargs['id_post']
-        instance = get_object_or_404(Post, pk=id_post)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def perform_destroy(self, instance):
-        id_post = self.kwargs['id_post']
-        instance = get_object_or_404(Post, pk=id_post)
-        instance.delete()
-
-
-class LikeView(CreateAPIView, DestroyAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all()
-    serializer_class = LikeSerializer
-    lookup_field = 'id'
-
-    def perform_create(self, serializer):
-        # ipdb.set_trace()
-        print(self.request.user)
-        post = self.kwargs.get('id')
-        user = self.request.user
-        serializer.save(post_id=post, user_id=user.id)
-        return Response({'message': 'Like adicionado com sucesso!'})
-
-    def perform_destroy(self, instance):
-        post = get_object_or_404(Post, id=self.kwargs.get('id'))
-        user = self.request.user
-        post.users_likes.remove(user)
+    lookup_field = "id"
