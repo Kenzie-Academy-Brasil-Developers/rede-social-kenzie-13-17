@@ -3,7 +3,7 @@ from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPI
 from .serializers import CommentSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from publications.models import Publication
+from posts.models import Post
 from django.shortcuts import get_object_or_404
 from .permissions import IsFriendOrFollowed, IsPostOrCommentOwner
 
@@ -17,13 +17,13 @@ class CommentsView(ListCreateAPIView):
 
     def get_queryset(self):
         id_post = self.kwargs['id_post']
-        comments = Comment.objects.filter(publications_id=id_post)
+        comments = Comment.objects.filter(publication=id_post)
         return comments
 
     def perform_create(self, serializer):
         id_post = self.kwargs['id_post']
-        get_object_or_404(Publication, pk=id_post)
-        serializer.save(publications_id=id_post)
+        post = get_object_or_404(Post, pk=id_post)
+        serializer.save(publication=post)
 
 
 class CommentsDetailView(UpdateAPIView, DestroyAPIView):
@@ -32,6 +32,7 @@ class CommentsDetailView(UpdateAPIView, DestroyAPIView):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    lookup_url_kwarg = "id_comment"
 
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
