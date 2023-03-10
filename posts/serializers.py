@@ -4,7 +4,7 @@ from .models import Post
 from users.serializer import UserSerializer
 from users.models import User
 from django.shortcuts import get_object_or_404
-import ipdb
+
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,8 +37,8 @@ class LikeSerializer(serializers.Serializer):
         post = get_object_or_404(Post, pk=post_id)
 
         post.users_likes.add(user)
-        
+
         return {}
-    
+
     def to_representation(self, instance):
         return {'message': 'Like adicionado com sucesso!'}
