@@ -10,33 +10,39 @@ from rest_framework.generics import (
 )
 from .serializers import FriendshipSerializer
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 
 class FriendshipView(ListAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = FriendshipSerializer
     queryset = Friendship.objects.all()
 
     def get_queryset(self):
         return Friendship.objects.all().filter(
-            Q(user_id=self.request.user.id) | Q(user_relation_id=self.request.user.id),
+            Q(user_id=self.request.user.id) |
+            Q(user_relation_id=self.request.user.id),
             friendship_status=True,
         )
 
 
 class FriendshipPendingView(ListAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = FriendshipSerializer
     queryset = Friendship.objects.all()
 
     def get_queryset(self):
-        return self.request.user.friend_res.all().filter(friendship_status=False)
+        return self.request.user.friend_res.all().filter(
+            friendship_status=False)
 
 
 class FriendshipDetailView(CreateAPIView, UpdateAPIView, DestroyAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = FriendshipSerializer
     queryset = Friendship.objects.all()
@@ -44,7 +50,8 @@ class FriendshipDetailView(CreateAPIView, UpdateAPIView, DestroyAPIView):
 
     def perform_create(self, serializer):
         serializer.save(
-            user_id=self.request.user.id, user_relation_id=self.kwargs.get("id_user")
+            user_id=self.request.user.id,
+            user_relation_id=self.kwargs.get("id_user")
         )
 
     def partial_update(self, request, *args, **kwargs):
@@ -56,4 +63,5 @@ class FriendshipDetailView(CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         new_friend_user.save()
 
-        return Response({"message": "New friendship created"}, status.HTTP_200_OK)
+        return Response({"message": "new friendship created"},
+                        status.HTTP_200_OK)

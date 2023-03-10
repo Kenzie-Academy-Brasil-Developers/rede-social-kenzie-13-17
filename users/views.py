@@ -5,6 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 import datetime
 from .permissions import IsReqUser
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserView(generics.ListCreateAPIView):
@@ -27,6 +28,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class UserFollowView(generics.CreateAPIView, generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = FollowSerializer
     queryset = User.objects.all()
@@ -35,10 +37,12 @@ class UserFollowView(generics.CreateAPIView, generics.DestroyAPIView):
     def perform_create(self, serializer):
         user_to_follow = get_object_or_404(User, pk=self.kwargs.get("id_user"))
 
-        serializer.save(from_user_id=self.request.user.id, to_user_id=user_to_follow.id)
+        serializer.save(from_user_id=self.request.user.id,
+                        to_user_id=user_to_follow.id)
 
     def perform_destroy(self, instance):
-        user_to_unfollow = self.request.user.following.all().get(pk=instance.id)
+        user_to_unfollow = self.request.user.following.all().get(
+            pk=instance.id)
 
         user_to_unfollow.followers.set(
             user_to_unfollow.followers.exclude(id=self.request.user.id)
@@ -47,6 +51,7 @@ class UserFollowView(generics.CreateAPIView, generics.DestroyAPIView):
 
 class UserFollowsView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
@@ -57,6 +62,7 @@ class UserFollowsView(generics.ListAPIView):
 
 class UserFollowersView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = UserSerializer
     queryset = User.objects.all()
