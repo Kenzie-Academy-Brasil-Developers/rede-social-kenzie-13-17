@@ -26,9 +26,9 @@ class PostView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         posts = Post.objects.filter(user__followers=user)
-        friends = Friendship.objects.filter(user_id=user.id)
-        for x in friends:
-            id = x.user_relation
+        friends = Friendship.objects.filter(user_id=user.id, friendship_status=True)
+        for obj in friends:
+            id = obj.user_relation
             friend_post = Post.objects.filter(user_id=id)
             posts = posts.union(friend_post)
 
