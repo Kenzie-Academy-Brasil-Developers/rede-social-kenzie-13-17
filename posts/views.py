@@ -1,7 +1,8 @@
 from rest_framework.generics import (ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView,
                                      CreateAPIView,
-                                     DestroyAPIView)
+                                     DestroyAPIView,
+                                     ListAPIView)
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post
@@ -10,9 +11,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import Response
 from .serializers import PostSerializer
 from friendships.models import Friendship
-from .permissions import IsPrivatePost, IsPostOrCommentOwner
+from .permissions import IsPrivatePost, IsPostOwner
 from django.http import Http404
-from .permissions import IsFriend
 
 
 class PostView(ListCreateAPIView):
@@ -30,7 +30,8 @@ class PostView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         posts = Post.objects.filter(user__following=user)
-        friends = Friendship.objects.filter(user_id=user.id, friendship_status=True)
+        friends = Friendship.objects.filter(user_id=user.id,
+                                            friendship_status=True)
         for obj in friends:
             id = obj.user_relation
             friend_post = Post.objects.filter(user_id=id)
@@ -43,7 +44,7 @@ class PostView(ListCreateAPIView):
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOrCommentOwner]
+    permission_classes = [IsAuthenticated, IsPostOwner]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -73,7 +74,7 @@ class LikeView(CreateAPIView, DestroyAPIView):
 
 class FriendPostView(ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsFriend]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = PostSerializer
 
@@ -84,4 +85,3 @@ class FriendPostView(ListAPIView):
         if query:
             return query
         raise Http404
-

@@ -8,12 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from posts.models import Post
 from users.models import User
 from django.shortcuts import get_object_or_404
-from .permissions import IsFriendOrFollowed, IsPostOrCommentOwner
+from .permissions import IsCommentOwner
 
 
 class CommentsView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsFriendOrFollowed]
+    permission_classes = [IsAuthenticated]
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -33,7 +33,7 @@ class CommentsView(ListCreateAPIView):
 
 class CommentsDetailView(UpdateAPIView, DestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOrCommentOwner]
+    permission_classes = [IsAuthenticated, IsCommentOwner]
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
