@@ -5,14 +5,14 @@ from rest_framework.generics import (ListCreateAPIView,
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post
-from users.models import User
 from .serializers import PostSerializer, LikeSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import Response
-from django.db.models import Q
 from .serializers import PostSerializer
 from friendships.models import Friendship
 from .permissions import IsPrivatePost, IsPostOrCommentOwner
+from django.http import Http404
+from .permissions import IsFriend
 
 
 class PostView(ListCreateAPIView):
@@ -29,14 +29,16 @@ class PostView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        posts = Post.objects.filter(user__followers=user)
-        friends = Friendship.objects.filter(user_id=user.id)
-        for x in friends:
-            id = x.user_relation
+        posts = Post.objects.filter(user__following=user)
+        friends = Friendship.objects.filter(user_id=user.id, friendship_status=True)
+        for obj in friends:
+            id = obj.user_relation
             friend_post = Post.objects.filter(user_id=id)
             posts = posts.union(friend_post)
 
-        return posts
+        if posts:
+            return posts
+        raise Http404
 
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
@@ -45,7 +47,7 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    lookup_field = "id"
+    lookup_field = 'id'
 
 
 class LikeView(CreateAPIView, DestroyAPIView):
@@ -67,3 +69,19 @@ class LikeView(CreateAPIView, DestroyAPIView):
         post = get_object_or_404(Post, id=self.kwargs.get('id'))
         user = self.request.user
         post.users_likes.remove(user)
+
+
+class FriendPostView(ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsFriend]
+
+    serializer_class = PostSerializer
+
+    lookup_field = 'id_user'
+
+    def get_queryset(self):
+        query = Post.objects.filter(user_id=self.kwargs.get('id_user'))
+        if query:
+            return query
+        raise Http404
+
