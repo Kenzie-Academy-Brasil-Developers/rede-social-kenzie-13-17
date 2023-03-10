@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from .models import User
+from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 
 
@@ -56,6 +56,24 @@ class FollowSerializer(serializers.Serializer):
     def create(self, validated_data):
         follower_user = get_object_or_404(User, pk=validated_data["from_user_id"])
 
+        user_to_follow = validated_data["to_user_id"]
+
+        if follower_user.following.filter(id=user_to_follow):
+            raise serializers.ValidationError(
+                {"message": "You already follow this user"}
+            )
+
         follower_user.following.add(validated_data["to_user_id"])
 
         return {}
+
+    def to_representation(self, instance):
+        request = self.context.get("request")
+
+        follower_user = get_object_or_404(User, pk=request.auth["user_id"])
+
+        user_to_follow = request.parser_context["kwargs"]["id_user"]
+
+        return {
+            "message": f"Now you follow the user {follower_user.following.get(id=user_to_follow).username}"
+        }

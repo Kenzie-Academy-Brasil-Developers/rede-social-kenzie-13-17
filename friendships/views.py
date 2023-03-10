@@ -56,4 +56,4 @@ class FriendshipDetailView(CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         new_friend_user.save()
 
-        return Response({"message": "new friendship created"}, status.HTTP_200_OK)
+        return Response({"message": "New friendship created"}, status.HTTP_200_OK)
