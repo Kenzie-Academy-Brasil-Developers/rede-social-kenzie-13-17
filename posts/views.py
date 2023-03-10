@@ -8,6 +8,7 @@ from rest_framework.views import Response
 from .serializers import PostSerializer
 from friendships.models import Friendship
 from django.http import Http404
+from .permissions import IsFriend
 
 
 class PostView(ListCreateAPIView):
@@ -67,7 +68,7 @@ class LikeView(CreateAPIView, DestroyAPIView):
 
 class FriendPostView(ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsFriend]
 
     serializer_class = PostSerializer
 
@@ -78,3 +79,4 @@ class FriendPostView(ListAPIView):
         if query:
             return query
         raise Http404
+
