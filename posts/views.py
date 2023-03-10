@@ -1,4 +1,7 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import (ListCreateAPIView,
+                                     RetrieveUpdateDestroyAPIView,
+                                     CreateAPIView,
+                                     DestroyAPIView)
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post
@@ -9,11 +12,12 @@ from rest_framework.views import Response
 from django.db.models import Q
 from .serializers import PostSerializer
 from friendships.models import Friendship
+from .permissions import IsPrivatePost, IsPostOrCommentOwner
 
 
 class PostView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsPrivatePost]
 
     serializer_class = PostSerializer
     queryset = Post.objects.all()
@@ -37,7 +41,7 @@ class PostView(ListCreateAPIView):
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsPostOrCommentOwner]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -47,6 +51,7 @@ class PostDetailView(RetrieveUpdateDestroyAPIView):
 class LikeView(CreateAPIView, DestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     queryset = Post.objects.all()
     serializer_class = LikeSerializer
     lookup_field = 'id'

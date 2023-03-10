@@ -1,5 +1,7 @@
 from .models import Comment
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import (ListCreateAPIView,
+                                     UpdateAPIView,
+                                     DestroyAPIView)
 from .serializers import CommentSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
