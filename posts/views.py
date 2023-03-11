@@ -13,6 +13,8 @@ from .serializers import PostSerializer
 from friendships.models import Friendship
 from .permissions import IsPrivatePost, IsPostOwner
 from django.http import Http404
+from rest_framework.exceptions import ValidationError
+
 
 
 class PostView(ListCreateAPIView):
@@ -63,8 +65,12 @@ class LikeView(CreateAPIView, DestroyAPIView):
         print(self.request.user)
         post = self.kwargs.get('id')
         user = self.request.user
+        post_obj = get_object_or_404(Post, id=post)
+
+        if post_obj.users_likes.filter(id=user.id).exists():
+            raise ValidationError('User already like this post')
+        
         serializer.save(post_id=post, user_id=user.id)
-        return Response({'message': 'Like adicionado com sucesso!'})
 
     def perform_destroy(self, instance):
         post = get_object_or_404(Post, id=self.kwargs.get('id'))
