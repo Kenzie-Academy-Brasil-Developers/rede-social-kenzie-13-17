@@ -63,7 +63,7 @@ class LikeView(CreateAPIView, DestroyAPIView):
 
         if post_obj.users_likes.filter(id=user.id).exists():
             raise ValidationError('User already like this post')
-        
+
         serializer.save(post_id=post, user_id=user.id)
 
     def perform_destroy(self, instance):

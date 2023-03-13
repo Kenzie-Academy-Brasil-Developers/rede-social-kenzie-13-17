@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from friendships.models import Friendship
 from django.db.models import Q
+from rest_framework.exceptions import PermissionDenied
 
 
 class IsPostOwner(permissions.BasePermission):
@@ -32,8 +33,8 @@ class IsPrivatePost(permissions.BasePermission):
                 return False
         else:
             return True
-        
-        
+
+
 class IsFriend(permissions.BasePermission):
     def has_permission(self, request, view: View) -> bool:
         user_id = request.user.id
