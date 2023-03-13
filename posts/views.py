@@ -16,7 +16,6 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 
 
-
 class PostView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsPrivatePost]
@@ -85,6 +84,4 @@ class FriendPostView(ListAPIView):
 
     def get_queryset(self):
         query = Post.objects.filter(user_id=self.kwargs.get('id_user'))
-        if query:
-            return query
-        raise Http404
+        return query
