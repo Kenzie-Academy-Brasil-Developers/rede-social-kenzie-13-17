@@ -10,10 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .serializers import PostSerializer, LikeSerializer
 from django.shortcuts import get_object_or_404
-
 from .serializers import PostSerializer
-from .permissions import IsPostOwner
-from django.http import Http404
+from .permissions import IsPostOwner, IsFriend
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 
@@ -84,14 +82,12 @@ class LikeView(CreateAPIView, DestroyAPIView):
 
 class FriendPostView(ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsFriend]
 
     serializer_class = PostSerializer
 
     lookup_field = "id_user"
 
     def get_queryset(self):
-        query = Post.objects.filter(user_id=self.kwargs.get("id_user"))
-        if query:
-            return query
-        raise Http404
+        query = Post.objects.filter(user_id=self.kwargs.get('id_user'))
+        return query
