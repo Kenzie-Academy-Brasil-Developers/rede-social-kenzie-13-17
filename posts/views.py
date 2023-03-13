@@ -11,7 +11,7 @@ from .models import Post
 from .serializers import PostSerializer, LikeSerializer
 from django.shortcuts import get_object_or_404
 from .serializers import PostSerializer
-from .permissions import IsPostOwner, IsFriend
+from .permissions import IsPostOwner, IsFriend, IsPrivatePost
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 
@@ -46,9 +46,9 @@ class PostView(ListCreateAPIView):
         ).distinct()
 
 
-class PostDetailView(RetrieveUpdateDestroyAPIView):
+class PostDetailView(RetrieveUpdateDestroyAPIView): 
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOwner]
+    permission_classes = [IsAuthenticated, IsPostOwner, IsPrivatePost]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
