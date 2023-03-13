@@ -8,11 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .serializers import PostSerializer, LikeSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.views import Response
 from .serializers import PostSerializer
 from friendships.models import Friendship
-from .permissions import IsPrivatePost, IsPostOwner
-from django.http import Http404
+from .permissions import IsPrivatePost, IsPostOwner, IsFriend
 from rest_framework.exceptions import ValidationError
 
 
@@ -76,7 +74,7 @@ class LikeView(CreateAPIView, DestroyAPIView):
 
 class FriendPostView(ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsFriend]
 
     serializer_class = PostSerializer
 
