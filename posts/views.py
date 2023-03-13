@@ -17,7 +17,7 @@ from django.http import Http404
 
 class PostView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPrivatePost]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = PostSerializer
     queryset = Post.objects.all()
@@ -44,7 +44,7 @@ class PostView(ListCreateAPIView):
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOwner]
+    permission_classes = [IsAuthenticated, IsPrivatePost]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
