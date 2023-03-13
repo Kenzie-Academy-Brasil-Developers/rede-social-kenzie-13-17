@@ -41,4 +41,4 @@ class LikeSerializer(serializers.Serializer):
         return {}
 
     def to_representation(self, instance):
-        return {'message': 'Like adicionado com sucesso!'}
+        return {'detail': 'You liked this post'}
