@@ -4,8 +4,10 @@ from .models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 import datetime
-from .permissions import IsReqUser
 from rest_framework.permissions import IsAuthenticated
+import rest_framework.serializers as serializers
+import uuid
+from .permissions import IsReqUser
 
 
 class UserView(generics.ListCreateAPIView):
@@ -35,14 +37,17 @@ class UserFollowView(generics.CreateAPIView, generics.DestroyAPIView):
     lookup_url_kwarg = "id_user"
 
     def perform_create(self, serializer):
-        user_to_follow = get_object_or_404(User, pk=self.kwargs.get("id_user"))
+        try:
+            id_user = uuid.UUID(str(self.kwargs.get("id_user")))
+        except ValueError:
+            raise serializers.ValidationError({"message": "Invalid UUID"})
 
-        serializer.save(from_user_id=self.request.user.id,
-                        to_user_id=user_to_follow.id)
+        user_to_follow = get_object_or_404(User, pk=id_user)
+
+        serializer.save(from_user_id=self.request.user.id, to_user_id=user_to_follow.id)
 
     def perform_destroy(self, instance):
-        user_to_unfollow = self.request.user.following.all().get(
-            pk=instance.id)
+        user_to_unfollow = self.request.user.following.all().get(pk=instance.id)
 
         user_to_unfollow.followers.set(
             user_to_unfollow.followers.exclude(id=self.request.user.id)
