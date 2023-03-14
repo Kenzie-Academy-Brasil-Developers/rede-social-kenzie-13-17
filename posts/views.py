@@ -18,7 +18,7 @@ from django.db.models import Q
 
 class PostView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     serializer_class = PostSerializer
     queryset = Post.objects.all()
@@ -46,9 +46,9 @@ class PostView(ListCreateAPIView):
         ).distinct()
 
 
-class PostDetailView(RetrieveUpdateDestroyAPIView): 
+class PostDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOwner, IsPrivatePost]
+    permission_classes = [IsPostOwner, IsPrivatePost]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -89,5 +89,5 @@ class FriendPostView(ListAPIView):
     lookup_field = "id_user"
 
     def get_queryset(self):
-        query = Post.objects.filter(user_id=self.kwargs.get('id_user'))
+        query = Post.objects.filter(user_id=self.kwargs.get("id_user"))
         return query
