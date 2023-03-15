@@ -11,14 +11,14 @@ from .models import Post
 from .serializers import PostSerializer, LikeSerializer
 from django.shortcuts import get_object_or_404
 from .serializers import PostSerializer
-from .permissions import IsPostOwner, IsFriend
+from .permissions import IsPostOwner, IsFriend, IsPrivatePost
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 
 
 class PostView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     serializer_class = PostSerializer
     queryset = Post.objects.all()
@@ -48,7 +48,7 @@ class PostView(ListCreateAPIView):
 
 class PostDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsPostOwner]
+    permission_classes = [IsPostOwner, IsPrivatePost]
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -89,5 +89,5 @@ class FriendPostView(ListAPIView):
     lookup_field = "id_user"
 
     def get_queryset(self):
-        query = Post.objects.filter(user_id=self.kwargs.get('id_user'))
+        query = Post.objects.filter(user_id=self.kwargs.get("id_user"))
         return query
